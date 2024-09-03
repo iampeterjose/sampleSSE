@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 const MyOrder = () => {
     const [orderDetails, setOrderDetails] = useState([]);
@@ -59,15 +59,15 @@ const MyOrder = () => {
 
     return (
         <div>
-            <input 
-                type="text" 
+            <input
+                type="text"
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
                 placeholder="Enter item name"
                 className="border-2 border-slate-400 rounded-md h-10 p-2"
             />
             <br />
-            <button 
+            <button
                 onClick={handleAddOrder}
                 className="mt-2 bg-blue-500 h-10 px-2 text-white rounded-md"
             >

@@ -1,47 +1,30 @@
-// app/api/orders/route.js
-
 import { NextResponse } from 'next/server';
 
 let orders = [];
-let clients = [];
 
-const sendUpdates = () => {
-    const data = JSON.stringify({
+const createSSEMessage = (data) => {
+    return `data: ${JSON.stringify(data)}\n\n`;
+};
+
+const sendUpdates = (controller) => {
+    const data = {
         orderCount: orders.length,
-        orders: orders,
-    });
+        orders,
+    };
 
-    const message = `data: ${data}\n\n`;
-    clients.forEach(client => {
-        client.write(message);
-    });
+    const message = createSSEMessage(data);
+    controller.enqueue(message);
 };
 
 export async function GET(req) {
     const stream = new ReadableStream({
         start(controller) {
-            const client = {
-                write(message) {
-                    controller.enqueue(message);
-                }
-            };
+            sendUpdates(controller);
 
-            clients.push(client);
-
-            req.signal.addEventListener('abort', () => {
-                clients = clients.filter(c => c !== client);
-                controller.close();
-            });
-
-            // Send initial updates
-            sendUpdates();
-
-            // Simulate updates for testing
-            const intervalId = setInterval(sendUpdates, 5000); // Update every 5 seconds
+            const intervalId = setInterval(() => sendUpdates(controller), 5000);
 
             req.signal.addEventListener('abort', () => {
                 clearInterval(intervalId);
-                clients = clients.filter(c => c !== client);
                 controller.close();
             });
         }
@@ -65,8 +48,6 @@ export async function POST(req) {
 
         const newOrder = { id: orders.length + 1, item };
         orders.push(newOrder);
-
-        sendUpdates();
 
         return NextResponse.json(newOrder);
     } catch (error) {
