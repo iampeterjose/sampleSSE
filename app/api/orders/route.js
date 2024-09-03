@@ -37,9 +37,7 @@ export async function GET(req) {
             sendUpdates();
 
             // Simulate updates for testing
-            const intervalId = setInterval(() => {
-                sendUpdates();
-            }, 5000); // Update every 5 seconds
+            const intervalId = setInterval(sendUpdates, 5000); // Update every 5 seconds
 
             req.signal.addEventListener('abort', () => {
                 clearInterval(intervalId);
