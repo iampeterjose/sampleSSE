@@ -23,7 +23,7 @@ const MyOrder = () => {
                 },
                 body: JSON.stringify({ item: itemName }),
             });
-            setItemName(''); // Clear the input field after submission
+            setItemName('');
         } catch (error) {
             console.error('Error adding order:', error);
         }
