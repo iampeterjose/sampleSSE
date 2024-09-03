@@ -16,25 +16,23 @@ export async function GET(req) {
         'Connection': 'keep-alive',
     };
 
-    const streamClosed = new Promise(resolve => {
-        req.signal.addEventListener('abort', () => {
-            resolve();
-        });
-    });
-
+    // Create a new readable stream for SSE
     const stream = new ReadableStream({
         start(controller) {
             const sendEvent = (data) => {
                 controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
             };
 
+            // Send initial data
             sendEvent({ orderCount: orders.length, orders });
 
+            // Send updates every 5 seconds
             const intervalId = setInterval(() => {
                 sendEvent({ orderCount: orders.length, orders });
-            }, 3000);
+            }, 5000);
 
-            streamClosed.then(() => {
+            // Handle stream closure
+            req.signal.addEventListener('abort', () => {
                 clearInterval(intervalId);
                 controller.close();
             });
