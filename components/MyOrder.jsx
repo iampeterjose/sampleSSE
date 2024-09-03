@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 
 const MyOrder = () => {
@@ -14,14 +13,21 @@ const MyOrder = () => {
         }
 
         try {
-            await fetch('/api/orders', {
+            const response = await fetch('/api/orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ item: itemName }),
             });
-            setItemName('');
+
+            if (response.ok) {
+                const newOrder = await response.json();
+                console.log('Order added:', newOrder);
+                setItemName('');
+            } else {
+                throw new Error('Network response was not ok');
+            }
         } catch (error) {
             console.error('Error adding order:', error);
         }
@@ -31,9 +37,14 @@ const MyOrder = () => {
         const es = new EventSource('/api/orders');
 
         es.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            setOrderCount(data.orderCount || 0);
-            setOrderDetails(data.orders || []);
+            try {
+                const data = JSON.parse(event.data);
+                setOrderCount(data.orderCount || 0);
+                setOrderDetails(data.orders || []);
+                console.log('SSE Data:', data);
+            } catch (error) {
+                console.error('Error parsing SSE data:', error);
+            }
         };
 
         es.onerror = (error) => {
